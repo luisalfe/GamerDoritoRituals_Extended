@@ -1,10 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".AccelerationActivity">
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:id="@+id/main"
+    android:background="?android:attr/windowBackground">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <!-- Aceleración actual -->
+    <TextView
+        android:id="@+id/currentAcceleration"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Aceleración actual: 0.00 m/s²"
+        android:textSize="18sp"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Aceleración media -->
+    <TextView
+        android:id="@+id/averageAcceleration"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Aceleración media: 0.00 m/s²"
+        android:textSize="18sp"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Tiempo en movimiento -->
+    <TextView
+        android:id="@+id/timeText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Tiempo en movimiento: 0 ms"
+        android:textSize="18sp" />
+
+    <Button
+        android:id="@+id/btnViewRecords"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Ver Registros"
+        android:layout_gravity="center"
+        android:layout_marginTop="16dp" />
+
+
+</LinearLayout>

@@ -53,6 +53,11 @@ public class VoteActivity extends AppCompatActivity {
             // Mostrar el diálogo "Acerca de"
             showAboutDialog();
             return true;
+        } else if (id == R.id.menu_settings) {
+            // Navegar a la actividad de preferencias
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
+            return true;
         }
 
         return super.onOptionsItemSelected(item);

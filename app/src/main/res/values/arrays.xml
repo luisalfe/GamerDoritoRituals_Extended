@@ -1,0 +1,27 @@
+<resources>
+    <!-- Opciones de tamaño de texto -->
+    <string-array name="text_size_options">
+        <item>Pequeño</item>
+        <item>Mediano</item>
+        <item>Grande</item>
+    </string-array>
+
+    <string-array name="text_size_values">
+        <item>12</item>
+        <item>16</item>
+        <item>20</item>
+    </string-array>
+
+    <!-- Opciones de color de texto -->
+    <string-array name="text_color_options">
+        <item>Negro</item>
+        <item>Rojo</item>
+        <item>Azul</item>
+    </string-array>
+
+    <string-array name="text_color_values">
+        <item>#000000</item>
+        <item>#FF0000</item>
+        <item>#0000FF</item>
+    </string-array>
+</resources>

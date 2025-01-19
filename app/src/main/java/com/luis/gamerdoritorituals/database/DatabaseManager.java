@@ -14,21 +14,36 @@ public class DatabaseManager extends SQLiteOpenHelper {
 
     // Nombre de la base de datos y versión
     private static final String DATABASE_NAME = "gamer_tasks.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2; // Incrementado a 2
 
-    // Nombre de la tabla y columnas
+    // Nombre de la tabla y columnas para tareas
     public static final String TABLE_TASKS = "tasks";
     public static final String COLUMN_ID = "id";
     public static final String COLUMN_TITLE = "title";
     public static final String COLUMN_DESCRIPTION = "description";
     public static final String COLUMN_COMPLETED = "is_completed";
 
-    // Query para crear la tabla
+    // Nombre de la tabla y columnas para aceleración
+    public static final String TABLE_ACCELERATION = "acceleration";
+    public static final String COLUMN_ACCELERATION_ID = "id";
+    public static final String COLUMN_ACCELERATION_AVERAGE = "average";
+    public static final String COLUMN_ACCELERATION_TIME = "time_in_motion";
+    public static final String COLUMN_ACCELERATION_TIMESTAMP = "timestamp";
+
+    // Query para crear la tabla de tareas
     private static final String CREATE_TABLE_TASKS = "CREATE TABLE " + TABLE_TASKS + " (" +
             COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
             COLUMN_TITLE + " TEXT NOT NULL, " +
             COLUMN_DESCRIPTION + " TEXT, " +
             COLUMN_COMPLETED + " INTEGER DEFAULT 0" +
+            ");";
+
+    // Query para crear la tabla de aceleración
+    private static final String CREATE_TABLE_ACCELERATION = "CREATE TABLE " + TABLE_ACCELERATION + " (" +
+            COLUMN_ACCELERATION_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+            COLUMN_ACCELERATION_AVERAGE + " REAL NOT NULL, " +
+            COLUMN_ACCELERATION_TIME + " INTEGER NOT NULL, " +
+            COLUMN_ACCELERATION_TIMESTAMP + " TEXT NOT NULL" +
             ");";
 
     public DatabaseManager(Context context) {
@@ -37,8 +52,9 @@ public class DatabaseManager extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        // Crear la tabla al inicializar la base de datos
+        // Crear tablas al inicializar la base de datos
         db.execSQL(CREATE_TABLE_TASKS);
+        db.execSQL(CREATE_TABLE_ACCELERATION);
 
         // Insertar tareas iniciales
         db.execSQL("INSERT INTO tasks (title, description, is_completed) VALUES " +
@@ -50,14 +66,14 @@ public class DatabaseManager extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // Actualizar la base de datos si cambia la versión
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_TASKS);
-        onCreate(db);
+        // Actualizar la base de datos según la versión
+        if (oldVersion < 2) {
+            // Añadir la tabla de aceleración si no existe
+            db.execSQL(CREATE_TABLE_ACCELERATION);
+        }
     }
 
-
-    // Creacion de todos los metodos CRUD para manejar la base
-
+    // Métodos CRUD para tareas
     public long addTask(Task task) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -65,10 +81,9 @@ public class DatabaseManager extends SQLiteOpenHelper {
         values.put(COLUMN_DESCRIPTION, task.getDescription());
         values.put(COLUMN_COMPLETED, task.isCompleted() ? 1 : 0);
 
-        // Insertar la tarea y devolver el ID generado
         long id = db.insert(TABLE_TASKS, null, values);
         db.close();
-        return id; // Devuelve el ID de la nueva tarea
+        return id;
     }
 
     public ArrayList<Task> getAllTasks() {
@@ -100,25 +115,56 @@ public class DatabaseManager extends SQLiteOpenHelper {
         values.put(COLUMN_DESCRIPTION, task.getDescription());
         values.put(COLUMN_COMPLETED, task.isCompleted() ? 1 : 0);
 
-        // Actualizar la tarea por ID
-        int rowsAffected = db.update(TABLE_TASKS, values, COLUMN_ID + " = ?",
-                new String[]{String.valueOf(task.getId())});
+        int rowsAffected = db.update(TABLE_TASKS, values, COLUMN_ID + " = ?", new String[]{String.valueOf(task.getId())});
         db.close();
-        return rowsAffected; // Devuelve el número de filas afectadas
+        return rowsAffected;
     }
 
     public int deleteTask(int id) {
         SQLiteDatabase db = this.getWritableDatabase();
-
-        // Eliminar la tarea por ID
         int rowsDeleted = db.delete(TABLE_TASKS, COLUMN_ID + " = ?", new String[]{String.valueOf(id)});
         db.close();
-        return rowsDeleted; // Devuelve el número de filas eliminadas
+        return rowsDeleted;
     }
 
+    // Métodos CRUD para aceleración
+    public long addAccelerationData(float averageAcceleration, long timeInMotion, String timestamp) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_ACCELERATION_AVERAGE, averageAcceleration);
+        values.put(COLUMN_ACCELERATION_TIME, timeInMotion);
+        values.put(COLUMN_ACCELERATION_TIMESTAMP, timestamp);
 
+        long id = db.insert(TABLE_ACCELERATION, null, values);
+        db.close();
+        return id;
+    }
 
+    public ArrayList<String> getAllAccelerationData() {
+        ArrayList<String> accelerationData = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
 
+        String query = "SELECT * FROM " + TABLE_ACCELERATION;
+        Cursor cursor = db.rawQuery(query, null);
 
+        if (cursor.moveToFirst()) {
+            do {
+                String data = "Aceleración Media: " + cursor.getFloat(cursor.getColumnIndexOrThrow(COLUMN_ACCELERATION_AVERAGE)) +
+                        " m/s², Tiempo: " + cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_ACCELERATION_TIME)) +
+                        " ms, Inicio: " + cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ACCELERATION_TIMESTAMP));
+                accelerationData.add(data);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        db.close();
+        return accelerationData;
+    }
 
+    public int deleteAccelerationData(int id) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        int rowsDeleted = db.delete(TABLE_ACCELERATION, COLUMN_ACCELERATION_ID + " = ?", new String[]{String.valueOf(id)});
+        db.close();
+        return rowsDeleted;
+    }
 }
+

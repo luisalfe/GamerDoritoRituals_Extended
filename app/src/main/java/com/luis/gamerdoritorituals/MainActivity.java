@@ -48,6 +48,13 @@ public class MainActivity extends AppCompatActivity {
         ListView lvTasks = findViewById(R.id.lvTasks);
         lvTasks.setAdapter(taskAdapter); // Conectar el adaptador al ListView
 
+        // Botón para abrir la AccelerationActivity
+        Button btnAcceleration = findViewById(R.id.btnAcceleration);
+        btnAcceleration.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, AccelerationActivity.class);
+            startActivity(intent);
+        });
+
         // Configurar el listener para editar/eliminar tareas
         lvTasks.setOnItemClickListener((parent, view, position, id) -> {
             // Obtener la tarea seleccionada
@@ -166,6 +173,11 @@ public class MainActivity extends AppCompatActivity {
         } else if (id == R.id.menu_about) {
             // Mostrar el diálogo "Acerca de"
             showAboutDialog();
+            return true;
+        } else if (id == R.id.menu_settings) {
+            // Navegar a la actividad de preferencias
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
             return true;
         }
 

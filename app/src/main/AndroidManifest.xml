@@ -13,6 +13,12 @@
         android:theme="@style/Theme.GamerDoritoRituals"
         tools:targetApi="31">
         <activity
+            android:name=".SettingsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AccelerationRecordsActivity"
+            android:exported="false" />
+        <activity
             android:name=".AccelerationActivity"
             android:exported="false" />
         <activity
