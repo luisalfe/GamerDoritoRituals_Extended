@@ -1,12 +1,17 @@
 package com.luis.gamerdoritorituals;
 
+import android.app.AlertDialog;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
@@ -15,6 +20,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.preference.PreferenceManager;
+import android.Manifest;
 
 import android.widget.Button;
 import android.widget.TextView;
@@ -47,6 +53,17 @@ public class AccelerationActivity extends AppCompatActivity implements SensorEve
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        // Crear el canal de notificaciones
+        createNotificationChannel();
+
+
+        // Solicitar permiso en Android 13+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, 1);
+            }
+        }
 
         // Vincular las vistas del diseño
         currentAccelerationText = findViewById(R.id.currentAcceleration);
@@ -138,18 +155,83 @@ public class AccelerationActivity extends AppCompatActivity implements SensorEve
     }
 
     private void guardarEnBaseDeDatos(float aceleracionMedia, long tiempoEnMilis, long timestampInicio) {
-        // Formatear el timestamp a una fecha legible
         String timestamp = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
                 .format(new java.util.Date(timestampInicio));
 
-        // Guardar los datos en la base de datos
         DatabaseManager dbManager = new DatabaseManager(this);
         long id = dbManager.addAccelerationData(aceleracionMedia, tiempoEnMilis, timestamp);
 
         if (id != -1) {
-            Toast.makeText(this, "Datos guardados con ID: " + id, Toast.LENGTH_SHORT).show();
+            // Iniciar el servicio de notificación
+            Intent notificationIntent = new Intent(this, NotificationService.class);
+            notificationIntent.putExtra("message", "Se registró una aceleración media de " + aceleracionMedia + " m/s²");
+            startService(notificationIntent);
+
+            Toast.makeText(this, "Datos guardados con éxito", Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(this, "Error al guardar datos de aceleración", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Error al guardar datos", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(android.view.Menu menu) {
+        // Inflar el menú con el archivo XML
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(android.view.MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.menu_main) {
+            // Navegar a MainActivity
+            Intent intent = new Intent(this, MainActivity.class);
+            startActivity(intent);
+            return true;
+        } else if (id == R.id.menu_games) {
+            // Navegar a la lista de juegos
+            Intent intent = new Intent(this, GamesActivity.class);
+            startActivity(intent);
+            return true;
+        } else if (id == R.id.menu_about) {
+            // Mostrar el diálogo "Acerca de"
+            showAboutDialog();
+            return true;
+        } else if (id == R.id.menu_settings) {
+            // Navegar a la actividad de preferencias
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    // Método para mostrar el diálogo "Acerca de"
+    private void showAboutDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("Acerca de")
+                .setMessage("Esta aplicación está diseñada para organizar rituales gamer y votar por tu waifu favorita. ¡Diviértete!")
+                .setPositiveButton("OK", null)
+                .show();
+    }
+
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            String channelId = "acceleration_channel";
+            CharSequence name = "Registros de Aceleración";
+            String description = "Notificaciones sobre nuevos registros de aceleración";
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+
+            NotificationChannel channel = new NotificationChannel(channelId, name, importance);
+            channel.setDescription(description);
+
+            // Registrar el canal con el sistema
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            if (notificationManager != null) {
+                notificationManager.createNotificationChannel(channel);
+            }
         }
     }
 
