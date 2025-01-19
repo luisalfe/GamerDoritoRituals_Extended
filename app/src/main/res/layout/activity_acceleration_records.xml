@@ -6,6 +6,7 @@
     android:orientation="vertical"
     android:padding="16dp">
 
+    <!-- Título -->
     <TextView
         android:id="@+id/tvTitle"
         android:layout_width="wrap_content"
@@ -16,13 +17,16 @@
         android:layout_gravity="center"
         android:layout_marginBottom="16dp" />
 
+    <!-- ListView con peso ajustado -->
     <ListView
         android:id="@+id/lvAccelerationRecords"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:divider="@android:color/darker_gray"
         android:dividerHeight="1dp" />
 
+    <!-- Botón para compartir estadísticas -->
     <Button
         android:id="@+id/btnShareStats"
         android:layout_width="match_parent"
@@ -31,3 +35,4 @@
         android:layout_marginTop="16dp" />
 
 </LinearLayout>
+
